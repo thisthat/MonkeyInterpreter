@@ -1,0 +1,18 @@
+language: go
+
+go:
+  - 1.6
+  - 1.7
+  - 1.8
+  - tip
+
+
+before_install:
+  - go get -v github.com/golang/lint/golint
+
+before_install:
+  -  gofmt -l .
+
+script:
+  - ./pre-push
+  - go test -cpu=1,2 -v -tags integration ./...

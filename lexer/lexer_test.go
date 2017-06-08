@@ -1,17 +1,17 @@
 package lexer
 
-import  (
-	"testing"
+import (
 	"github.com/thisthat/MonkeyInterpreter/token"
+	"testing"
 )
 
-func TestNextToken(t *testing.T){
+func TestNextToken(t *testing.T) {
 	input := "=+(){},;"
 	tests := []struct {
-		expectedType 	token.TokenType
-		expectedLiteral	string
+		expectedType    token.TokenType
+		expectedLiteral string
 	}{
-		{token.ASSIGN,"="},
+		{token.ASSIGN, "="},
 		{token.PLUS, "+"},
 		{token.LPAREN, "("},
 		{token.RPAREN, ")"},
@@ -21,7 +21,7 @@ func TestNextToken(t *testing.T){
 		{token.SEMICOLON, ";"},
 	}
 
-	l := New(input);
+	l := New(input)
 	for i, tt := range tests {
 		tok := l.NextToken()
 		if tok.Type != tt.expectedType {

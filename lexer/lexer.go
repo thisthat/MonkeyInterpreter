@@ -1,27 +1,27 @@
-// Will provide a basic fashionless regexpr free lexer
+// Package lexer will provide a basic fashionless regexpr free lexer
 // currently from the text it seems to be a LL(1) type
 package lexer
 
 import "github.com/thisthat/MonkeyInterpreter/token"
 
+// Structure which holds the status of the lexer
 type Lexer struct {
-	input 			string
-	position 		int
-	readPosition	int
-	ch	 			byte
+	input        string
+	position     int
+	readPosition int
+	ch           byte
 	// \forall position . ch = input[position]
 	// \forall position . position = readPosition + 1
 }
 
-
-// Create the Lexer Object
+// New create the Lexer Object
 func New(input string) *Lexer {
 	l := &Lexer{input: input}
 	l.readchar()
 	return l
 }
 
-// Read the next char from the input
+// readchar read the next char from the input
 func (l *Lexer) readchar() {
 	if l.readPosition >= len(l.input) {
 		l.ch = 0
@@ -32,10 +32,30 @@ func (l *Lexer) readchar() {
 	l.readPosition++
 }
 
-// Gimme the next Token from the input
-func (l *Lexer) NextToken() token.Token  {
-	var tok token.Token
-	tok.Literal = "\\eof"
-	tok.Type = token.EOF
+// NextToken gives the next Token from the input
+func (l *Lexer) NextToken() token.Token {
+	var t token.TokenType
+	switch l.ch {
+	case '=':
+		t = token.ASSIGN
+	case ';':
+		t = token.SEMICOLON
+	case '(':
+		t = token.LPAREN
+	case ')':
+		t = token.RPAREN
+	case ',':
+		t = token.COMMA
+	case '+':
+		t = token.PLUS
+	case '{':
+		t = token.LBRACE
+	case '}':
+		t = token.RBRACE
+	case 0:
+		t = token.EOF
+	}
+	tok := token.Token{Type: t, Literal: string(l.ch)}
+	l.readchar()
 	return tok
 }

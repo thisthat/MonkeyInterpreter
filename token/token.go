@@ -1,38 +1,37 @@
 // Package token provides the structure of the token used in the Lexer/Parser
 package token
 
-
 // We define tokens with a string which identifies their name
 type TokenType string
 
 // Token structure
 type Token struct {
-	Type 	TokenType
+	Type    TokenType
 	Literal string
-	Line 	int
-	Col  	int
-	File 	string
+	Line    int
+	Col     int
+	File    string
 }
 
 // Constant which identifies the token type
 const (
 	ILLEGAL = "ILLEGAL" // Unexpected symbols
-	EOF = "EOF"
+	EOF     = "EOF"
 
 	// Identifiers and Literals
 	IDENT = "IDENT"
-	INT = "INT"
+	INT   = "INT"
 
 	// Operators
 	ASSIGN = "="
-	PLUS = "+"
-	MINUS = "-"
-	MUL = "*"
-	DIV = "/"
-	MOD = "%"
+	PLUS   = "+"
+	MINUS  = "-"
+	MUL    = "*"
+	DIV    = "/"
+	MOD    = "%"
 
 	// Delimiters
-	COMMA = ","
+	COMMA     = ","
 	SEMICOLON = ";"
 
 	// Pars
@@ -43,8 +42,5 @@ const (
 
 	// Keywords
 	FUNCTION = "fn"
-	LET = "let"
-
+	LET      = "let"
 )
-
-
