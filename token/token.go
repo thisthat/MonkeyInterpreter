@@ -1,7 +1,7 @@
 // Package token provides the structure of the token used in the Lexer/Parser
 package token
 
-// We define tokens with a string which identifies their name
+// TokenType defines tokens with a string which identifies their name
 type TokenType string
 
 // Token structure

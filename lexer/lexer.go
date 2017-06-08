@@ -4,7 +4,7 @@ package lexer
 
 import "github.com/thisthat/MonkeyInterpreter/token"
 
-// Structure which holds the status of the lexer
+// Lexer Structure which holds the status
 type Lexer struct {
 	input        string
 	position     int
