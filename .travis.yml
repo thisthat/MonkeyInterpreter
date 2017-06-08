@@ -12,9 +12,6 @@ before_install:
   - go get golang.org/x/tools/cmd/cover
   - go get github.com/mattn/goveralls
 
-before_install:
-  -  gofmt -l .
-
 script:
   - go test ./...
   - $HOME/gopath/bin/goveralls -service=travis-ci
