@@ -14,5 +14,4 @@ before_install:
   -  gofmt -l .
 
 script:
-  - ./pre-push
   - go test -cpu=1,2 -v -tags integration ./...
