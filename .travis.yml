@@ -9,9 +9,12 @@ go:
 
 before_install:
   - go get -v github.com/golang/lint/golint
+  - go get golang.org/x/tools/cmd/cover
+  - go get github.com/mattn/goveralls
 
 before_install:
   -  gofmt -l .
 
 script:
-  - go test -cpu=1,2 -v -tags integration ./...
+  - go test ./...
+  - $HOME/gopath/bin/goveralls -service=travis-ci
