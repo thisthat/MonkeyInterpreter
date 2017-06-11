@@ -157,3 +157,94 @@ func TestSignleToken(t *testing.T) {
 		}
 	}
 }
+
+func TestLineToken(t *testing.T) {
+	filename := "../testresources/smallPrograms/Token.monkey"
+	buf, err := ioutil.ReadFile(filename)
+	if err != nil {
+		panic(err)
+	}
+	input := string(buf)
+	tests := []struct {
+		expectedCol  int
+		expectedLine int
+	}{
+		{1, 1},
+		{2, 1},
+		{3, 1},
+		{4, 1},
+		{5, 1},
+
+		{1, 2},
+		{2, 2},
+		{3, 2},
+		{4, 2},
+		{5, 2},
+		//10
+		{1, 4},
+		{4, 4},
+		{5, 4},
+		{6, 4},
+		{7, 4},
+		{9, 4},
+		{11, 4},
+
+		{5, 5},
+		{12, 5},
+		{16, 5},
+		//20
+		{1, 6},
+		{3, 6},
+		{8, 6},
+
+		{5, 7},
+		{12, 7},
+		{17, 7},
+
+		{1, 8},
+
+		{1, 10},
+		{4, 10},
+		{7, 10},
+		//30
+		{1, 11},
+		{3, 11},
+		{6, 11},
+
+		{-1, -1},
+	}
+	l := New(input)
+	for i, tt := range tests {
+		tok := l.NextToken()
+		if tok.Line != tt.expectedLine {
+			t.Fatalf("Test[%d] - Wrong Line. Expected=%d, got=%d", i, tt.expectedLine, tok.Line)
+		}
+		if tok.Col != tt.expectedCol {
+			t.Fatalf("Test[%d] - Wrong Column. Expected=%d, got=%d", i, tt.expectedCol, tok.Col)
+		}
+	}
+}
+
+func TestNotValidToken(t *testing.T) {
+	input := "!=<@#>"
+	tests := []struct {
+		expType token.TokenType
+		expLit  string
+	}{
+		{token.NEQ, "!="},
+		{token.LT, "<"},
+		{token.ILLEGAL, "@"},
+		{token.ILLEGAL, "#"},
+		{token.GT, ">"},
+	}
+	l := New(input)
+	for i, tt := range tests {
+		tok := l.NextToken()
+		if tok.Literal != tt.expLit {
+			t.Fatalf("Test[%d] - Wrong Literal. Expected=%q, got=%q", i, tt.expLit, tok.Literal)
+		}
+		if tok.Type != tt.expType {
+			t.Fatalf("Test[%d] - Wrong Type. Expected=%q, got=%q", i, tt.expType, tok.Type)
+		}
+	}
+}

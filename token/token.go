@@ -10,7 +10,6 @@ type Token struct {
 	Literal string
 	Line    int
 	Col     int
-	File    string
 }
 
 // Constant which identifies the token type

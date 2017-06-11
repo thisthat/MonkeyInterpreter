@@ -2,7 +2,9 @@
 // currently from the text it seems to be a LL(1) type
 package lexer
 
-import "github.com/thisthat/MonkeyInterpreter/token"
+import (
+	"github.com/thisthat/MonkeyInterpreter/token"
+)
 
 // Lexer Structure which holds the status
 type Lexer struct {
@@ -10,13 +12,15 @@ type Lexer struct {
 	position     int
 	readPosition int
 	ch           byte
+	line         int
+	col          int
 	// \forall position . ch = input[position]
 	// \forall position . position = readPosition + 1
 }
 
 // New create the Lexer Object
 func New(input string) *Lexer {
-	l := &Lexer{input: input}
+	l := &Lexer{input: input, line: 1, col: 0}
 	l.readchar()
 	return l
 }
@@ -30,6 +34,7 @@ func (l *Lexer) readchar() {
 	}
 	l.position = l.readPosition
 	l.readPosition++
+	l.col++
 }
 
 // peekChar read the next char in the input without then moving to the next one
@@ -54,7 +59,7 @@ func (l *Lexer) NextToken() token.Token {
 			l.readchar()
 			lit := string(ch) + string(l.ch)
 			l.readchar()
-			return token.Token{Type: token.EQ, Literal: lit}
+			return token.Token{Type: token.EQ, Literal: lit, Line: l.line, Col: l.col - len(lit)}
 		}
 		t = token.ASSIGN
 
@@ -64,7 +69,7 @@ func (l *Lexer) NextToken() token.Token {
 			l.readchar()
 			lit := string(ch) + string(l.ch)
 			l.readchar()
-			return token.Token{Type: token.NEQ, Literal: lit}
+			return token.Token{Type: token.NEQ, Literal: lit, Line: l.line, Col: l.col - len(lit)}
 		}
 		t = token.BANG
 
@@ -100,28 +105,35 @@ func (l *Lexer) NextToken() token.Token {
 		//handle strings
 		if isLetter(l.ch) {
 			lit := l.readIdentifier()
-			return token.Token{Type: token.LookupTypeIdent(lit), Literal: lit}
+			return token.Token{Type: token.LookupTypeIdent(lit), Literal: lit, Line: l.line, Col: l.col - len(lit)}
 		} else if isDigit(l.ch) {
 			lit := l.readNumber()
-			return token.Token{Type: token.INT, Literal: lit}
+			return token.Token{Type: token.INT, Literal: lit, Line: l.line, Col: l.col - len(lit)}
 		} else {
 			t = token.ILLEGAL
 		}
 	}
 	lit := string(l.ch)
+	ll := l.line
+	cc := l.col
 	if lit == "\x00" {
 		lit = ""
+		ll = -1
+		cc = -1
 	}
-	tok := token.Token{Type: t, Literal: lit}
+	tok := token.Token{Type: t, Literal: lit, Line: ll, Col: cc}
 	l.readchar()
 	return tok
 }
 
 func (l *Lexer) skipWhites() {
 	for isWhite(l.ch) {
+		if isNewLine(l.ch) {
+			l.line++
+			l.col = 0
+		}
 		l.readchar()
 	}
-
 }
 
 func (l *Lexer) readIdentifier() string {
@@ -147,5 +159,8 @@ func isDigit(ch byte) bool {
 	return '0' <= ch && ch <= '9'
 }
 func isWhite(ch byte) bool {
-	return ch == ' ' || ch == '\t' || ch == '\r' || ch == '\n'
+	return ch == ' ' || ch == '\t' || ch == '\r' || isNewLine(ch)
+}
+func isNewLine(ch byte) bool {
+	return ch == '\n'
 }
