@@ -29,6 +29,9 @@ const (
 	MUL    = "*"
 	DIV    = "/"
 	MOD    = "%"
+	LT     = "<"
+	GT     = ">"
+	BANG   = "!"
 
 	// Delimiters
 	COMMA     = ","
@@ -43,11 +46,21 @@ const (
 	// Keywords
 	FUNCTION = "fn"
 	LET      = "let"
+	TRUE     = "true"
+	FALSE    = "false"
+	RETURN   = "return"
+	IF       = "if"
+	ELSE     = "else"
 )
 
 var keywords = map[string]TokenType{
-	"fn":  FUNCTION,
-	"let": LET,
+	"fn":     FUNCTION,
+	"let":    LET,
+	"true":   TRUE,
+	"false":  FALSE,
+	"return": RETURN,
+	"if":     IF,
+	"else":   ELSE,
 }
 
 // LookupTypeIdent returns the token type for the keywords or IDENT

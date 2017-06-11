@@ -59,6 +59,12 @@ func (l *Lexer) NextToken() token.Token {
 		t = token.MUL
 	case '%':
 		t = token.MOD
+	case '!':
+		t = token.BANG
+	case '<':
+		t = token.LT
+	case '>':
+		t = token.GT
 	case '{':
 		t = token.LBRACE
 	case '}':

@@ -94,3 +94,57 @@ func TestAdd(t *testing.T) {
 		}
 	}
 }
+
+func TestSignleToken(t *testing.T) {
+	filename := "../testresources/smallPrograms/Token.monkey"
+	buf, err := ioutil.ReadFile(filename)
+	if err != nil {
+		panic(err)
+	}
+	input := string(buf)
+	tests := []struct {
+		expectedType    token.TokenType
+		expectedLiteral string
+	}{
+		{token.MINUS, "-"},
+		{token.DIV, "/"},
+		{token.MUL, "*"},
+		{token.MOD, "%"},
+		{token.PLUS, "+"},
+
+		{token.LT, "<"},
+		{token.GT, ">"},
+		{token.ASSIGN, "="},
+		{token.BANG, "!"},
+
+		{token.IF, "if"},
+		{token.LPAREN, "("},
+		{token.INT, "5"},
+		{token.LT, "<"},
+		{token.INT, "10"},
+		{token.RPAREN, ")"},
+		{token.LBRACE, "{"},
+		{token.RETURN, "return"},
+		{token.TRUE, "true"},
+		{token.SEMICOLON, ";"},
+		{token.RBRACE, "}"},
+		{token.ELSE, "else"},
+		{token.LBRACE, "{"},
+		{token.RETURN, "return"},
+		{token.FALSE, "false"},
+		{token.SEMICOLON, ";"},
+		{token.RBRACE, "}"},
+
+		{token.EOF, ""},
+	}
+	l := New(input)
+	for i, tt := range tests {
+		tok := l.NextToken()
+		if tok.Type != tt.expectedType {
+			t.Fatalf("Test[%d] - Wrong Token %q. Expected=%q, got=%q", i, tok, tt.expectedType, tok.Type)
+		}
+		if tok.Literal != tt.expectedLiteral {
+			t.Fatalf("Test[%d] - Wrong Literal. Expected=%q, got=%q", i, tt.expectedLiteral, tok.Literal)
+		}
+	}
+}
