@@ -29,9 +29,13 @@ const (
 	MUL    = "*"
 	DIV    = "/"
 	MOD    = "%"
-	LT     = "<"
-	GT     = ">"
-	BANG   = "!"
+
+	// Comparators
+	LT   = "<"
+	GT   = ">"
+	BANG = "!"
+	EQ   = "=="
+	NEQ  = "!="
 
 	// Delimiters
 	COMMA     = ","

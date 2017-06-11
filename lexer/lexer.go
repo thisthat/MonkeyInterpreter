@@ -21,7 +21,7 @@ func New(input string) *Lexer {
 	return l
 }
 
-// readchar read the next char from the input
+// readchar read the next char from the input and move forward
 func (l *Lexer) readchar() {
 	if l.readPosition >= len(l.input) {
 		l.ch = 0
@@ -32,6 +32,15 @@ func (l *Lexer) readchar() {
 	l.readPosition++
 }
 
+// peekChar read the next char in the input without then moving to the next one
+func (l *Lexer) peekChar() byte {
+	if l.readPosition >= len(l.input) {
+		return 0
+	}
+	return l.input[l.readPosition]
+
+}
+
 // NextToken gives the next Token from the input
 func (l *Lexer) NextToken() token.Token {
 	var t token.TokenType
@@ -40,7 +49,25 @@ func (l *Lexer) NextToken() token.Token {
 
 	switch l.ch {
 	case '=':
+		if l.peekChar() == '=' {
+			ch := l.ch
+			l.readchar()
+			lit := string(ch) + string(l.ch)
+			l.readchar()
+			return token.Token{Type: token.EQ, Literal: lit}
+		}
 		t = token.ASSIGN
+
+	case '!':
+		if l.peekChar() == '=' {
+			ch := l.ch
+			l.readchar()
+			lit := string(ch) + string(l.ch)
+			l.readchar()
+			return token.Token{Type: token.NEQ, Literal: lit}
+		}
+		t = token.BANG
+
 	case ';':
 		t = token.SEMICOLON
 	case '(':
@@ -59,8 +86,6 @@ func (l *Lexer) NextToken() token.Token {
 		t = token.MUL
 	case '%':
 		t = token.MOD
-	case '!':
-		t = token.BANG
 	case '<':
 		t = token.LT
 	case '>':
@@ -91,6 +116,7 @@ func (l *Lexer) NextToken() token.Token {
 	l.readchar()
 	return tok
 }
+
 func (l *Lexer) skipWhites() {
 	for isWhite(l.ch) {
 		l.readchar()
