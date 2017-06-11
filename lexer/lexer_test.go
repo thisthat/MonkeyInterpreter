@@ -226,7 +226,7 @@ func TestLineToken(t *testing.T) {
 }
 
 func TestNotValidToken(t *testing.T) {
-	input := "!=<@#>"
+	input := "!=<@#>!"
 	tests := []struct {
 		expType token.TokenType
 		expLit  string
@@ -236,6 +236,7 @@ func TestNotValidToken(t *testing.T) {
 		{token.ILLEGAL, "@"},
 		{token.ILLEGAL, "#"},
 		{token.GT, ">"},
+		{token.BANG, "!"},
 	}
 	l := New(input)
 	for i, tt := range tests {
