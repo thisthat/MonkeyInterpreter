@@ -11,18 +11,23 @@ import (
 // Start starts the Read Evaluate Print Loop
 func Start(in io.Reader, out io.Writer) {
 	scanner := bufio.NewScanner(in)
+	outter := bufio.NewWriter(out)
 	const PROMPT = ">> "
 	for {
+		outter.Flush()
 		fmt.Print(PROMPT)
 		scanned := scanner.Scan()
 		if !scanned {
+			outter.Flush()
 			return
 		}
 		line := scanner.Text()
 		l := lexer.New(line)
 
 		for tok := l.NextToken(); tok.Type != token.EOF; tok = l.NextToken() {
-			fmt.Printf("Tok: %+v\n", tok)
+			s := fmt.Sprintf("Tok: %+v\n", tok)
+			outter.WriteString(s)
+			outter.Flush()
 		}
 	}
 }
