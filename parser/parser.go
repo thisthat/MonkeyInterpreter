@@ -241,7 +241,6 @@ func (p *Parser) curPrecedence() int {
 	if p, ok := precedences[p.curToken.Type]; ok {
 		return p
 	}
-
 	return LOWEST
 }
 

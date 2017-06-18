@@ -11,6 +11,11 @@ import (
 
 // Start starts the Read Evaluate Print Loop
 func Start(in io.Reader, out io.Writer) {
+	StartHelp(in,out,true)
+}
+
+// StartHelp starts the Read Evaluate Print Loop
+func StartHelp(in io.Reader, out io.Writer, logo bool) {
 	scanner := bufio.NewScanner(in)
 	const PROMPT = ">> "
 	for {
@@ -26,7 +31,7 @@ func Start(in io.Reader, out io.Writer) {
 
 		program := p.ParseProgram()
 		if len(p.Errors()) != 0 {
-			printParserErrors(out, p.Errors())
+			printParserErrors(out, p.Errors(), logo)
 			continue
 		}
 		io.WriteString(out, program.String())
@@ -34,10 +39,11 @@ func Start(in io.Reader, out io.Writer) {
 	}
 }
 
-func printParserErrors(out io.Writer, errors []string) {
-	io.WriteString(out, MonkeyFace)
-	io.WriteString(out, "Woops! We ran into some monkey business here!\n")
-	io.WriteString(out, " parser errors:\n")
+func printParserErrors(out io.Writer, errors []string, logo bool) {
+	if logo {
+		io.WriteString(out, MonkeyFace)
+		io.WriteString(out, ErrorMsg)
+	}
 	for _, msg := range errors {
 		io.WriteString(out, "\t"+msg+"\n")
 	}
@@ -56,4 +62,10 @@ const MonkeyFace = `
        \   \ '~' /   /
         '._ '-=-' _.'
            '-----'
+`
+
+// ErrorMsg is used to print an error msg
+const ErrorMsg = `
+Woops! We ran into some monkey business here!
+parser errors:
 `

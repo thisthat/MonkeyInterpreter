@@ -5,7 +5,50 @@ import (
 	"github.com/thisthat/MonkeyInterpreter/ast"
 	"github.com/thisthat/MonkeyInterpreter/lexer"
 	"testing"
+	"github.com/thisthat/MonkeyInterpreter/token"
 )
+
+func TestParseErrors(t *testing.T) {
+	tests := []struct {
+		input              string
+		expectedIdentifier string
+		expectedValue      interface{}
+	}{
+		{"let x = \"5\";", "x", 5},
+	}
+
+	for _, tt := range tests {
+		l := lexer.New(tt.input)
+		p := New(l)
+		p.ParseProgram()
+		if len(p.errors) != 2 {
+			t.Fatalf("Expected %d erorrs, got %d", 2, len(p.errors))
+		}
+
+	}
+}
+
+func TestParseErrorsExpr(t *testing.T) {
+	tests := []struct {
+		input              string
+		expectedIdentifier string
+		expectedValue      interface{}
+	}{
+		{"let x = 5 $ 10;", "x", 5},
+	}
+
+	for _, tt := range tests {
+		l := lexer.New(tt.input)
+		p := New(l)
+		p.ParseProgram()
+		if len(p.errors) != 1 {
+			t.Fatalf("Expected %d erorrs, got %d", 1, len(p.errors))
+		}
+
+	}
+}
+
+
 
 func TestLetStatements(t *testing.T) {
 	tests := []struct {
@@ -24,6 +67,11 @@ func TestLetStatements(t *testing.T) {
 		program := p.ParseProgram()
 		checkParserErrors(t, p)
 
+		if program.TokenLiteral() != "let" {
+			t.Fatalf("program.TokenLiteral not 'let', got %q",
+				program.TokenLiteral())
+		}
+
 		if len(program.Statements) != 1 {
 			t.Fatalf("program.Statements does not contain 1 statements. got=%d",
 				len(program.Statements))
@@ -37,6 +85,27 @@ func TestLetStatements(t *testing.T) {
 		val := stmt.(*ast.LetStatement).Value
 		if !testLiteralExpression(t, val, tt.expectedValue) {
 			return
+		}
+	}
+}
+
+func TestLetErrors(t *testing.T) {
+	tests := []string {
+		"let",
+		"let x",
+	}
+	for i, tt := range tests {
+		l := lexer.New(tt)
+		p := New(l)
+		if p.expectPeek(token.LET) {
+			t.Fatalf("Expected not to be LET, got %s",  p.peekToken)
+		}
+		if i ==0 && !p.expectPeek(token.EOF) { //only for the first
+			t.Fatalf("Expected let, got %s",  p.peekToken)
+		}
+		let := p.parseLetStatement()
+		if let != nil {
+			t.Fatalf("Expected let to be nil, got %q",  let)
 		}
 	}
 }
@@ -93,6 +162,10 @@ func TestIdentifierExpression(t *testing.T) {
 	if !ok {
 		t.Fatalf("program.Statements[0] is not ast.ExpressionStatement. got=%T",
 			program.Statements[0])
+	}
+	if stmt.TokenLiteral() != "foobar" {
+		t.Fatalf("program.Statements[0] is called foobar. got=%s",
+			stmt.TokenLiteral())
 	}
 
 	ident, ok := stmt.Expression.(*ast.Identifier)
@@ -174,6 +247,10 @@ func TestParsingPrefixExpressions(t *testing.T) {
 		if !ok {
 			t.Fatalf("stmt is not ast.PrefixExpression. got=%T", stmt.Expression)
 		}
+		if exp.TokenLiteral() != tt.operator {
+			t.Fatalf("exp.Operator is not '%s'. got=%s",
+				tt.operator, exp.TokenLiteral())
+		}
 		if exp.Operator != tt.operator {
 			t.Fatalf("exp.Operator is not '%s'. got=%s",
 				tt.operator, exp.Operator)
@@ -228,13 +305,30 @@ func TestParsingInfixExpressions(t *testing.T) {
 			t.Fatalf("program.Statements[0] is not ast.ExpressionStatement. got=%T",
 				program.Statements[0])
 		}
-
 		if !testInfixExpression(t, stmt.Expression, tt.leftValue,
 			tt.operator, tt.rightValue) {
 			return
 		}
 	}
 }
+
+func TestInfixExprErrors(t *testing.T) {
+	tests := []struct {
+		input	string
+		expt	string
+	}{
+		{"5 $ 5", "5"},
+	}
+	for _, tt := range tests {
+		l := lexer.New(tt.input)
+		p := New(l)
+		expr := p.parseExpression(0)
+		if expr.String() != tt.expt {
+			t.Fatalf("Expected let to be nil, got %q",  expr)
+		}
+	}
+}
+
 
 func TestOperatorPrecedenceParsing(t *testing.T) {
 	tests := []struct {
@@ -421,6 +515,9 @@ func TestIfExpression(t *testing.T) {
 		t.Fatalf("stmt.Expression is not ast.IfExpression. got=%T",
 			stmt.Expression)
 	}
+	if exp.TokenLiteral() != "if"{
+		t.Errorf("consequence is not if. got=%q\n", exp.TokenLiteral())
+	}
 
 	if !testInfixExpression(t, exp.Condition, "x", "<", "y") {
 		return
@@ -429,6 +526,10 @@ func TestIfExpression(t *testing.T) {
 	if len(exp.Consequence.Statements) != 1 {
 		t.Errorf("consequence is not 1 statements. got=%d\n",
 			len(exp.Consequence.Statements))
+	}
+
+	if exp.Consequence.TokenLiteral() != "{" {
+		t.Errorf("consequence is not {. got=%q\n", exp.Consequence.TokenLiteral())
 	}
 
 	consequence, ok := exp.Consequence.Statements[0].(*ast.ExpressionStatement)
@@ -607,6 +708,10 @@ func TestCallExpressionParsing(t *testing.T) {
 			stmt.Expression)
 	}
 
+	if exp.TokenLiteral() != "(" {
+		t.Errorf("Call is not (. got=%q\n", exp.TokenLiteral())
+	}
+
 	if !testIdentifier(t, exp.Function, "add") {
 		return
 	}
@@ -712,6 +817,10 @@ func testInfixExpression(t *testing.T, exp ast.Expression, left interface{},
 		return false
 	}
 
+	if opExp.TokenLiteral() != operator {
+		t.Errorf("exp.Operator is not '%s'. got=%q", operator, opExp.Operator)
+		return false
+	}
 	if opExp.Operator != operator {
 		t.Errorf("exp.Operator is not '%s'. got=%q", operator, opExp.Operator)
 		return false
@@ -817,4 +926,79 @@ func checkParserErrors(t *testing.T, p *Parser) {
 		t.Errorf("parser error: %q", msg)
 	}
 	t.FailNow()
+}
+
+func TestPrecedence(t *testing.T){
+	l := lexer.New("let x = 1;")
+	p := New(l)
+	v := p.curPrecedence()
+	if v != LOWEST {
+		t.Fatalf("Expected precedence to be the lowest, get %d", v)
+	}
+}
+
+func TestErrorParseInteger(t *testing.T){
+	l := lexer.New("let x = \"5x\";")
+	p := New(l)
+	p.curToken.Literal = "5x"
+	e := p.parseIntegerLiteral()
+ 	if e != nil {
+		t.Fatalf("Expected to be nil, got %d", e)
+	}
+}
+func TestErrorGroupExpr(t *testing.T){
+	l := lexer.New("(5 +")
+	p := New(l)
+	e := p.parseGroupedExpression()
+ 	if e != nil {
+		t.Fatalf("Expected to be nil, got %d", e)
+	}
+}
+
+func TestErrorIf(t *testing.T) {
+	input := []string{
+		"if x",
+		"if (x",
+		"if (x)",
+		"if (x) { } else",
+	}
+	for _, tt := range input {
+		l := lexer.New(tt)
+		p := New(l)
+		e := p.parseIfExpression()
+		if e != nil {
+			t.Fatalf("Expected to be nil, got %q \n with expr %s", e, tt)
+		}
+	}
+}
+
+func TestErrorFuncLit(t *testing.T) {
+	input := []string{
+		"x",
+		"(x,",
+		"name (x,",
+		"name (x,y)",
+	}
+	for _, tt := range input {
+		l := lexer.New(tt)
+		p := New(l)
+		e := p.parseFunctionLiteral()
+		if e != nil {
+			t.Fatalf("Expected to be nil, got %q \n with expr %s", e, tt)
+		}
+	}
+}
+func TestErrorCallArg(t *testing.T) {
+	input := []string{
+		"x",
+		"(x,",
+	}
+	for _, tt := range input {
+		l := lexer.New(tt)
+		p := New(l)
+		e := p.parseCallArguments()
+		if e != nil {
+			t.Fatalf("Expected to be nil, got %q \n with expr %s", e, tt)
+		}
+	}
 }
