@@ -48,6 +48,21 @@ func TestParseErrorsExpr(t *testing.T) {
 	}
 }
 
+func TestEmptyProgram(t *testing.T) {
+	l := lexer.New("")
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+	if program.TokenLiteral() != "" {
+		t.Fatalf("program.TokenLiteral not empty, got %q",
+			program.TokenLiteral())
+	}
+	if len(program.Statements) != 0 {
+		t.Fatalf("program.Statements does not contain 0 statements. got=%d",
+			len(program.Statements))
+	}
+}
+
 func TestLetStatements(t *testing.T) {
 	tests := []struct {
 		input              string
