@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"github.com/thisthat/MonkeyInterpreter/ast"
 	"github.com/thisthat/MonkeyInterpreter/lexer"
-	"testing"
 	"github.com/thisthat/MonkeyInterpreter/token"
+	"testing"
 )
 
 func TestParseErrors(t *testing.T) {
@@ -48,8 +48,6 @@ func TestParseErrorsExpr(t *testing.T) {
 	}
 }
 
-
-
 func TestLetStatements(t *testing.T) {
 	tests := []struct {
 		input              string
@@ -90,7 +88,7 @@ func TestLetStatements(t *testing.T) {
 }
 
 func TestLetErrors(t *testing.T) {
-	tests := []string {
+	tests := []string{
 		"let",
 		"let x",
 	}
@@ -98,14 +96,14 @@ func TestLetErrors(t *testing.T) {
 		l := lexer.New(tt)
 		p := New(l)
 		if p.expectPeek(token.LET) {
-			t.Fatalf("Expected not to be LET, got %s",  p.peekToken)
+			t.Fatalf("Expected not to be LET, got %q", p.peekToken)
 		}
-		if i ==0 && !p.expectPeek(token.EOF) { //only for the first
-			t.Fatalf("Expected let, got %s",  p.peekToken)
+		if i == 0 && !p.expectPeek(token.EOF) { //only for the first
+			t.Fatalf("Expected let, got %q", p.peekToken)
 		}
 		let := p.parseLetStatement()
 		if let != nil {
-			t.Fatalf("Expected let to be nil, got %q",  let)
+			t.Fatalf("Expected let to be nil, got %q", let)
 		}
 	}
 }
@@ -314,8 +312,8 @@ func TestParsingInfixExpressions(t *testing.T) {
 
 func TestInfixExprErrors(t *testing.T) {
 	tests := []struct {
-		input	string
-		expt	string
+		input string
+		expt  string
 	}{
 		{"5 $ 5", "5"},
 	}
@@ -324,11 +322,10 @@ func TestInfixExprErrors(t *testing.T) {
 		p := New(l)
 		expr := p.parseExpression(0)
 		if expr.String() != tt.expt {
-			t.Fatalf("Expected let to be nil, got %q",  expr)
+			t.Fatalf("Expected let to be nil, got %q", expr)
 		}
 	}
 }
-
 
 func TestOperatorPrecedenceParsing(t *testing.T) {
 	tests := []struct {
@@ -515,7 +512,7 @@ func TestIfExpression(t *testing.T) {
 		t.Fatalf("stmt.Expression is not ast.IfExpression. got=%T",
 			stmt.Expression)
 	}
-	if exp.TokenLiteral() != "if"{
+	if exp.TokenLiteral() != "if" {
 		t.Errorf("consequence is not if. got=%q\n", exp.TokenLiteral())
 	}
 
@@ -928,7 +925,7 @@ func checkParserErrors(t *testing.T, p *Parser) {
 	t.FailNow()
 }
 
-func TestPrecedence(t *testing.T){
+func TestPrecedence(t *testing.T) {
 	l := lexer.New("let x = 1;")
 	p := New(l)
 	v := p.curPrecedence()
@@ -937,20 +934,20 @@ func TestPrecedence(t *testing.T){
 	}
 }
 
-func TestErrorParseInteger(t *testing.T){
+func TestErrorParseInteger(t *testing.T) {
 	l := lexer.New("let x = \"5x\";")
 	p := New(l)
 	p.curToken.Literal = "5x"
 	e := p.parseIntegerLiteral()
- 	if e != nil {
+	if e != nil {
 		t.Fatalf("Expected to be nil, got %d", e)
 	}
 }
-func TestErrorGroupExpr(t *testing.T){
+func TestErrorGroupExpr(t *testing.T) {
 	l := lexer.New("(5 +")
 	p := New(l)
 	e := p.parseGroupedExpression()
- 	if e != nil {
+	if e != nil {
 		t.Fatalf("Expected to be nil, got %d", e)
 	}
 }

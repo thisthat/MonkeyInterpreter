@@ -11,7 +11,7 @@ import (
 
 // Start starts the Read Evaluate Print Loop
 func Start(in io.Reader, out io.Writer) {
-	StartHelp(in,out,true)
+	StartHelp(in, out, true)
 }
 
 // StartHelp starts the Read Evaluate Print Loop

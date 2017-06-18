@@ -59,7 +59,6 @@ func TestREPL_Let(t *testing.T) {
 	check(t, get, exp)
 }
 
-
 func TestREPL_logo(t *testing.T) {
 	input := "let"
 	output := ""
